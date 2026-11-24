@@ -1,0 +1,35 @@
+# Input Leap Network Filter configuration
+# Location: ~/.config/input-leap-network-filter/config.toml
+# This file is parsed as data (a small TOML subset); it is never executed.
+# Changes apply the next time Input Leap is started.
+
+[filter]
+# true = filter active; false = Input Leap behaves exactly as without the filter.
+enabled = true
+# "denylist": hide interfaces matching profiles/exclude (default)
+# "allowlist": show only interfaces matching include (loopback is kept)
+# "off": never hide anything
+mode = "denylist"
+
+[interfaces]
+# Predefined pattern sets:
+#   docker      docker* br-* veth*
+#   lxc         lxcbr*
+#   lxd         lxdbr*
+#   incus       incusbr*
+#   podman      podman* cni-podman*
+#   kubernetes  cni* flannel* cali* kube-ipvs*
+#   libvirt     virbr* vnet*
+#   openvswitch ovs-*
+profiles = ["docker", "lxc"]
+
+# Extra patterns to hide (exact names or globs: * ? [abc]).
+exclude = []
+
+# Patterns that are ALWAYS shown. They win over profiles and exclude.
+include = []
+
+[logging]
+# Messages go to the standard error of the Input Leap process.
+enabled = false
+level = "warn"

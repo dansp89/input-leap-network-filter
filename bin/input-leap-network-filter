@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# input-leap-network-filter - hide virtual network interfaces from the
+# Input Leap GUI without touching the system network.
+# SPDX-License-Identifier: MIT
+set -Eeuo pipefail
+umask 022
+
+# Resolve the project root (works through the ~/.local/bin symlink).
+_self=$(readlink -f -- "${BASH_SOURCE[0]}")
+ILNF_ROOT=$(cd -- "$(dirname -- "$_self")/.." && pwd)
+readonly ILNF_ROOT
+
+for _m in common detect build ops report menu; do
+  # shellcheck source=/dev/null
+  source "$ILNF_ROOT/scripts/lib/$_m.sh"
+done
+
+if [[ $(id -u) == 0 && -z ${ILNF_ALLOW_ROOT:-} ]]; then
+  echo "input-leap-network-filter: do not run as root; it works per user and asks for sudo only to install packages." >&2
+  exit "$EX_USAGE"
+fi
+
+usage() {
+  load_locale
+  t help_text "$ILNF_NAME"
+  echo
+}
+
+main() {
+  local cmd="" arg
+  local -a rest=()
+  while [[ $# -gt 0 ]]; do
+    arg=$1
+    case $arg in
+      -h | --help) cmd=${cmd:-help} ;;
+      -V | --version) cmd=${cmd:-version} ;;
+      -v | --verbose) OPT_VERBOSE=1 ;;
+      -q | --quiet) OPT_QUIET=1 ;;
+      --debug) OPT_DEBUG=1 OPT_VERBOSE=1 ;;
+      -n | --dry-run) OPT_DRY_RUN=1 ;;
+      --non-interactive) OPT_NON_INTERACTIVE=1 ;;
+      -y | --yes) OPT_YES=1 ;;
+      --no-color) OPT_COLOR=0 ;;
+      --json) OPT_JSON=1 ;;
+      --purge) OPT_PURGE=1 ;;
+      --path) OPT_PATH=${2:?--path requires a value}; shift ;;
+      --path=*) OPT_PATH=${arg#--path=} ;;
+      --lang) OPT_LANG=${2:?--lang requires a value}; shift ;;
+      --lang=*) OPT_LANG=${arg#--lang=} ;;
+      --) shift; rest+=("$@"); break ;;
+      *)
+        if [[ -z $cmd ]]; then cmd=$arg; else rest+=("$arg"); fi
+        ;;
+    esac
+    shift
+  done
+  if [[ -n $OPT_PATH ]]; then
+    OPT_PATH=$(realpath -m -- "$OPT_PATH")
+  fi
+
+  init_paths
+  load_locale
+  setup_colors
+  [[ $OPT_DEBUG == 1 ]] && set -x
+
+  case $cmd in
+    "") if is_interactive; then run_menu; else usage; fi ;;
+    install) do_install install ;;
+    uninstall | remove) do_uninstall ;;
+    update | upgrade) do_update ;;
+    enable) do_enable ;;
+    disable) do_disable ;;
+    status) do_status ;;
+    doctor | diagnose) do_doctor ;;
+    repair) do_repair ;;
+    rollback) do_rollback ;;
+    interfaces | list) do_interfaces ;;
+    preview) do_preview ;;
+    configure | config) do_configure "${rest[@]}" ;;
+    reset) do_reset ;;
+    version) do_version ;;
+    help) usage ;;
+    *)
+      error "$(t err_unknown_command "$cmd")"
+      usage >&2
+      exit "$EX_USAGE"
+      ;;
+  esac
+}
+
+main "$@"
