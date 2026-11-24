@@ -118,20 +118,20 @@ found · `4` unsupported installation · `5` missing dependency · `6`
 conflict/integrity · `7` build or validation failed · `8` another instance
 running · `10` doctor found problems.
 
-`doctor` example (real output, Portuguese system):
+`doctor` example (real output, some lines omitted):
 
 ```text
-[OK]   Sistema operacional: Ubuntu 22.04.5 LTS (Tested)
-[OK]   Arquitetura: x86_64
-[OK]   Qt6 detectado (sistema 6.2.4)
-[OK]   Integridade da biblioteca verificada
-[OK]   Wrapper verificado
-[OK]   Executável original preservado
-[OK]   Filtro ativado
+[OK]   Operating system: Ubuntu 22.04.5 LTS (Tested)
+[OK]   Architecture: x86_64
+[OK]   Qt6 detected (system 6.2.4)
+[OK]   Filter library integrity verified
+[OK]   Wrapper verified
+[OK]   Original executable preserved
+[OK]   Filter enabled
 ...
-Interfaces físicas: 2
-Interfaces virtuais detectadas: 62
-Interfaces selecionadas para filtragem: 62
+Physical interfaces: 2
+Virtual interfaces detected: 63
+Interfaces selected for filtering: 62
 
 Status: Healthy
 ```
